@@ -1,4 +1,5 @@
 var Shopfront = artifacts.require("./Shopfront.sol");
+var ShopfrontHub = artifacts.require("./ShopfrontHub.sol");
 
 contract('Shopfront', (accounts) => {
 
@@ -6,8 +7,6 @@ contract('Shopfront', (accounts) => {
   var owner = accounts[0];
   var buyer = accounts[1];
   var admin = accounts[2];
-  // look into how I can make this into a Product
-  // var product = {id: 1, price: 20, stock: 5};
 
   beforeEach(() => {
     return Shopfront.new({from: owner})
@@ -16,50 +15,40 @@ contract('Shopfront', (accounts) => {
     });
   });
 
-  it("should allow administrators to add products", () => {
+  it("should allow administrators to add products", async () => {
     var priceItem1 = 10;
     var stockItem1 = 20;
 
     var priceItem2 = 100;
     var stockItem2 = 50;
 
-    return contract.addNewProduct.call(priceItem1, stockItem1, {from: owner})
-    .then((_txn) => {
-      console.log(_txn);
-      return contract.addNewProduct.call(priceItem2, stockItem2, {from: owner})
-      .then((_txn) => {
-        console.log(_txn);
-        return
-      });
-    });
+    await contract.addNewProduct(priceItem1, stockItem1, {from: owner})
+    const id2 = await contract.addNewProduct.call(stockItem2, priceItem2, {from: owner})
+    assert.equal(id2, 2, "Second product added should have an id of 2.")
   });
 
-  it("should allow users to purchase a product", () => {
+  it("should allow users to purchase a product", async () => {
     var priceItem1 = 10;
     var stockItem1 = 20;
 
-    var priceItem2 = 100;
-    var stockItem2 = 50;
-
-    // return contract.addNewProduct(priceItem1, stockItem1, {from: owner})
-    // .then((_txn) => {
-    //   return contract.viewProduct(1, {from: buyer1})
-    //   .then((_txn) => {
-    //     return contract.purchaseProduct(1, {from: buyer1}).
-    //     then((success) => {
-    //       return;
-    //     });
-    //   });
-    // });
+    await contract.addNewProduct(priceItem1, stockItem1, {from: owner});
+    const bought = await contract.purchaseProduct(1, {from: buyer, value: priceItem1});
+    const product = await contract.viewProduct(1, {from: buyer});
+    console.log(product[2], 19, 'Stock should be one less than initially added due to purchase.');
   });
 
-  it("should allow owners to add and remove value from the contract", () => {
-  });
+  it("should allow administrators to remove products", async () => {
+    var priceItem1 = 10;
+    var stockItem1 = 20;
+    var id = 1;
 
-  it("should allow removal of a product", () => {
-  });
+    await contract.addNewProduct(priceItem1, stockItem1, {from: owner});
+    const productAdded = await contract.viewProduct(id, {from: buyer});
+    console.log(product[3], true, 'Newly added product should be active.');
+    await contract.removeProduct(id, {from: owner});
+    const productRemoved = await contract.viewProduct(id, {from: buyer});
+    console.log(product[3], false, 'Removed product should be inactive.');
 
-  it("should allow products to be co-purchased", () => {
   });
 
 });

@@ -1,0 +1,10 @@
+.listing-table {
+  table-layout: fixed;
+  width: 300px;
+  border-color: black;
+  border-style: solid;
+}
+
+.Product > .product-cell {
+  text-align: center;
+}
