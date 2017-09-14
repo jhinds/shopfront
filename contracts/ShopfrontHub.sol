@@ -22,7 +22,6 @@ contract ShopFrontHub is Stoppable {
     }
 
     function createShop()
-        payable
         returns(address shopfront)
       {
         address shopAddress = new Shopfront();
